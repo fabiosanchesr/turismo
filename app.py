@@ -11,8 +11,12 @@ from database import User
 from utils.login_handler import restricted_page
 from dotenv import load_dotenv
 
+
+str(os.urandom(16))
+
+
 server = Flask(__name__)
-server.config.update(SECRET_KEY=os.getenv(str(os.urandom(333))))
+server.config.update(SECRET_KEY="b'\\xafx\\x81\\xba\\xde[\\xde\\xc4\\xb3CQ|8\\xbf22'")
 
 load_dotenv()
 
@@ -20,14 +24,22 @@ load_dotenv()
 def login_button_click():
     if request.form:
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])
-        if db.sess.query(User).filter_by(username=username) is None:
-            return """User not found"""
+        password = request.form['password']
+        
+        user = db.sess.query(User).filter_by(username=username).first()
+
+        if user is not None:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                return "sucess"
+        
         else:
-            return """Usuário encontrado"""
+            return "error"
+    else:
+        return "error"
 
 
-app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=[dbc.themes.MATERIA])
+app = dash.Dash(__name__, server=server, use_pages=True, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.MATERIA])
 
 
 login_manager = LoginManager()
