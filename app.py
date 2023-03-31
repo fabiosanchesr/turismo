@@ -31,12 +31,13 @@ def login_button_click():
         if user is not None:
             if check_password_hash(user.password, password):
                 login_user(user)
-                return "sucess"
-        
-        else:
-            return "error"
-    else:
-        return "error"
+            if 'url' in session:
+                if session['url']:
+                    url = session['url']
+                    session['url'] = None
+                    return redirect(url) ## redirect to target url
+            return redirect('/') ## redirect to home
+        return """invalid username and/or password <a href='/login'>login here</a>"""
 
 
 app = dash.Dash(__name__, server=server, use_pages=True, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.MATERIA])
@@ -61,7 +62,9 @@ app.layout = html.Div(
         html.Div(id="user-status-header"),
         html.Hr(),
         dash.page_container,
-    ]
+    ], 
+    className='d-flex align-items-center justify-content-center',
+    style={'height':'100vh'}
 )
 
 
